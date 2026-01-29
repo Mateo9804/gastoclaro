@@ -1,13 +1,11 @@
 import axios from 'axios';
 
-// FORZAMOS EL PUERTO 8080 QUE ES EL QUE USA TU XAMPP
-const API_URL = 'http://localhost:8080/gastoclaro/backend/public/api';
-
-console.log("🚀 CONEXIÓN FORZADA A:", API_URL);
+// Usamos variables de entorno para que sea flexible entre LOCAL y PRODUCCIÓN
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/gastoclaro/backend/public/api';
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 30000, // Aumentado para OCR pesado en Render
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
