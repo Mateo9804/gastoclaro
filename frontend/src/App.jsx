@@ -114,22 +114,26 @@ function App() {
             </div>
             
             <ul className="nav flex-column mt-md-0 mt-3 flex-grow-1">
-              <li className="nav-item">
-                <button 
-                  className={`nav-link w-100 text-start border-0 bg-transparent ${activeTab === 'dashboard' ? 'active' : ''}`} 
-                  onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }}
-                >
-                  <span className="material-symbols-rounded me-2">dashboard</span> Dashboard
-                </button>
-              </li>
-              <li className="nav-item">
-                <button 
-                  className={`nav-link w-100 text-start border-0 bg-transparent ${activeTab === 'upload' ? 'active' : ''}`} 
-                  onClick={() => { setActiveTab('upload'); setIsSidebarOpen(false); }}
-                >
-                  <span className="material-symbols-rounded me-2">upload_file</span> Subir Tickets
-                </button>
-              </li>
+              {userData?.role !== 'super_admin' && (
+                <>
+                  <li className="nav-item">
+                    <button 
+                      className={`nav-link w-100 text-start border-0 bg-transparent ${activeTab === 'dashboard' ? 'active' : ''}`} 
+                      onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }}
+                    >
+                      <span className="material-symbols-rounded me-2">dashboard</span> Dashboard
+                    </button>
+                  </li>
+                  <li className="nav-item">
+                    <button 
+                      className={`nav-link w-100 text-start border-0 bg-transparent ${activeTab === 'upload' ? 'active' : ''}`} 
+                      onClick={() => { setActiveTab('upload'); setIsSidebarOpen(false); }}
+                    >
+                      <span className="material-symbols-rounded me-2">upload_file</span> Subir Tickets
+                    </button>
+                  </li>
+                </>
+              )}
               
               {(userData?.role === 'admin' || userData?.role === 'super_admin') && (
                 <>
