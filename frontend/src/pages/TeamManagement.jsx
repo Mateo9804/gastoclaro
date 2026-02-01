@@ -11,6 +11,9 @@ const TeamManagement = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState(''); // Nuevo estado para errores
+  const [deletingUserId, setDeletingUserId] = useState(null); // Estado para modal de confirmación de eliminación
+  const [showErrorModal, setShowErrorModal] = useState(false); // Estado para modal de error
+  const [errorModalMessage, setErrorModalMessage] = useState(''); // Mensaje del modal de error
   const [userData, setUserData] = useState(JSON.parse(localStorage.getItem('userData')));
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -112,14 +115,30 @@ const TeamManagement = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Estás seguro de que quieres eliminar a este miembro del equipo?')) return;
+  const handleDelete = (id) => {
+    setDeletingUserId(id);
+  };
+
+  const executeDelete = async () => {
+    if (!deletingUserId) return;
     try {
-      await api.delete(`/team/${id}`);
+      await api.delete(`/team/${deletingUserId}`);
+      setDeletingUserId(null);
       fetchUsers();
+      setSuccessMessage(
+        isSuperAdmin 
+          ? 'Empresa eliminada correctamente.' 
+          : 'Miembro del equipo eliminado correctamente.'
+      );
+      setShowSuccessModal(true);
     } catch (error) {
-      setSuccessMessage('Error al eliminar el usuario');
-      setShowSuccessModal(true); // Reutilizamos el modal para errores simples de borrado por ahora o podríamos hacer uno específico
+      setDeletingUserId(null);
+      setErrorModalMessage(
+        isSuperAdmin 
+          ? 'Error al eliminar la empresa. Por favor, intenta nuevamente.' 
+          : 'Error al eliminar el usuario. Por favor, intenta nuevamente.'
+      );
+      setShowErrorModal(true);
     }
   };
 
@@ -337,6 +356,43 @@ const TeamManagement = () => {
         </div>
       )}
 
+      {/* Modal de Confirmación de Eliminación */}
+      {deletingUserId && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 rounded-4 shadow-lg">
+              <div className="modal-body p-5 text-center">
+                <div className="bg-danger-subtle text-danger rounded-circle d-inline-flex p-3 mb-4">
+                  <span className="material-symbols-rounded fs-1">delete_forever</span>
+                </div>
+                <h2 className="fw-bold mb-3">
+                  {isSuperAdmin ? '¿Eliminar empresa?' : '¿Eliminar miembro del equipo?'}
+                </h2>
+                <p className="text-muted mb-4">
+                  {isSuperAdmin 
+                    ? 'Esta acción no se puede deshacer. La empresa y todos sus datos serán eliminados permanentemente del sistema.'
+                    : 'Esta acción no se puede deshacer. El miembro del equipo será eliminado permanentemente.'}
+                </p>
+                <div className="d-flex gap-3">
+                  <button 
+                    className="btn btn-light btn-lg w-100 fw-bold rounded-3 py-3" 
+                    onClick={() => setDeletingUserId(null)}
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    className="btn btn-danger btn-lg w-100 fw-bold rounded-3 py-3" 
+                    onClick={executeDelete}
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Éxito Profesional */}
       {showSuccessModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
@@ -353,6 +409,31 @@ const TeamManagement = () => {
                 <button 
                   className="btn btn-primary btn-lg w-100 fw-bold rounded-3 py-3" 
                   onClick={() => setShowSuccessModal(false)}
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Error */}
+      {showErrorModal && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1060 }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 rounded-4 shadow-lg">
+              <div className="modal-body p-5 text-center">
+                <div className="bg-danger-subtle text-danger rounded-circle d-inline-flex p-3 mb-4">
+                  <span className="material-symbols-rounded fs-1">error</span>
+                </div>
+                <h2 className="fw-bold mb-3">Error</h2>
+                <p className="text-muted mb-4 fs-6">
+                  {errorModalMessage}
+                </p>
+                <button 
+                  className="btn btn-primary btn-lg w-100 fw-bold rounded-3 py-3" 
+                  onClick={() => setShowErrorModal(false)}
                 >
                   Entendido
                 </button>

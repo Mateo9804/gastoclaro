@@ -204,6 +204,23 @@ class TeamController extends Controller
     {
         $admin = Auth::user();
 
+        if ($admin->role === 'super_admin') {
+            // El Super Admin puede eliminar empresas (usuarios admin)
+            if ($user->role !== 'admin') {
+                return response()->json(['message' => 'Solo se pueden eliminar administradores de empresas'], 403);
+            }
+
+            // Eliminar la empresa asociada (esto eliminará automáticamente todos los usuarios de la empresa por cascade)
+            if ($user->company) {
+                $user->company->delete();
+            } else {
+                // Si no hay empresa asociada, solo eliminamos el usuario
+                $user->delete();
+            }
+
+            return response()->json(['message' => 'Empresa eliminada con éxito']);
+        }
+
         if ($admin->role !== 'admin') {
             return response()->json(['message' => 'No autorizado'], 403);
         }
